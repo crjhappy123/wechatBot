@@ -1,0 +1,3 @@
+# wechat_daily_bot/requirements.txt
+requests
+openai
