@@ -13,6 +13,4 @@ def get_fitness_tip():
         )
         return resp.choices[0].message.content.strip()
     except Exception as e:
-        print("❌ OpenAI 调用失败：", e)
-        return "今日建议生成失败"
-        return "今日建议生成失败"
+        return f"今日建议生成失败：{str(e)}"
