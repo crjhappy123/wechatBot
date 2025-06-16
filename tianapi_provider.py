@@ -1,3 +1,7 @@
+import os
+import requests
+
+
 def get_tianapi_data(api_name):
     api_key = os.environ.get("TIAN_API_KEY")
     if not api_key:
