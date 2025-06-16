@@ -1,10 +1,11 @@
 # wechat_daily_bot/main.py
 
 import os
-from weather_provider import get_weather, get_tianapi_data
 from stock_provider import get_stock_summary
 from fitness_provider import get_fitness_tip
 from wechat_sender import send_wecom_message
+from weather_provider import get_weather
+from tianapi_provider import get_tianapi_data
 
 def run_bot():
     # 获取各项内容
