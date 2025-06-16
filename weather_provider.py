@@ -2,7 +2,7 @@
 import requests
 import os
 
-def get_weather(city_code="320115"):  # 江宁区行政代码
+def get_weather(city_code="320100"):  # 江宁区行政代码
     key = os.environ.get("GAODE_API_KEY")
     base_url_weather = "https://restapi.amap.com/v3/weather/weatherInfo"
     base_url_air = "https://restapi.amap.com/v3/air/now"
