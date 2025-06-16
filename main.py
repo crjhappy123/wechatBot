@@ -34,12 +34,12 @@ def run_bot():
 {lishi}
 {guonei}
 
-# 🏋️ 健身饮食：{fitness}
+🏋️ 健身饮食：{fitness}
 
-# 📈 股市概览：{stock}
-#     """
+📈 股市概览：{stock}
+    """
 
-#     send_wecom_message(content.strip())
+    send_wecom_message(content.strip())
 
 
 if __name__ == "__main__":
