@@ -5,22 +5,41 @@ from weather_provider import get_weather
 from stock_provider import get_stock_summary
 from fitness_provider import get_fitness_tip
 from wechat_sender import send_wecom_message
+from tianapi_provider import get_tianapi_data
+
 
 def run_bot():
+    # 获取各项内容
     weather = get_weather()
     fitness = get_fitness_tip()
     stock = get_stock_summary()
 
+    # 天行 API 内容（附带 Emoji）
+    caipu = f"🥗 美食推荐：{get_tianapi_data('caipu')}"
+    zaoan = f"📖 每日一句：{get_tianapi_data('zaoan')}"
+    health = f"🧘 健康养生：{get_tianapi_data('health')}"
+    chengyu = f"📚 每日成语：{get_tianapi_data('chengyu')}"
+    lishi = f"📅 历史上的今天：{get_tianapi_data('lishi')}"
+
+    # 拼接消息
     content = f"""
-    📅 今日早报
+📅 今日早报
 
-    ☀️ 天气：{weather}
+☀️ 天气：{weather}
 
-    🏋️健身饮食：{fitness}
+{caipu}
+{zaoan}
+{health}
+{chengyu}
+{lishi}
 
-    📈 股市概览：{stock}
+🏋️ 健身饮食：{fitness}
+
+📈 股市概览：{stock}
     """
+
     send_wecom_message(content.strip())
+
 
 if __name__ == "__main__":
     run_bot()
