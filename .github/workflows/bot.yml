@@ -22,4 +22,5 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GAODE_API_KEY: ${{ secrets.GAODE_API_KEY }}
           WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+          QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
         run: python main.py
