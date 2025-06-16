@@ -33,6 +33,12 @@ def get_tianapi_data(api_name):
         elif api_name == "guonei":
             item = data['result']['newslist'][0]
             return f"{item['title']}"
+        elif api_name == "guonei":
+            items = data.get('result', {}).get('newslist', [])[:3]
+            titles = [item.get('title', '').strip() for item in items if item.get('title')]
+        if not titles:
+            return "📰 国内新闻：暂无"
+    return "📰 国内新闻：\n- " + "\n- ".join(titles)
         else:
             return f"✅ {api_name} 接口返回成功"
     except Exception as e:
