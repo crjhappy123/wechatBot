@@ -19,11 +19,11 @@ def run_bot():
     if isinstance(caipu_data, list) and len(caipu_data) > 0:
         cp = random.choice(caipu_data)
         caipu = (
-            f"🥗 美食推荐：{cp.get('cp_name', '未知')}\n"
-            f"特性：{cp.get('texing', '无')}\n"
-            f"原料：{cp.get('yuanliao', '无')}\n"
-            f"调料：{cp.get('tiaoliao', '无')}\n"
-            f"做法：{cp.get('zuofa', '无')}"
+            f"🥗 美食推荐：{cp.get('cp_name') or '未知'}\n"
+            f"特性：{cp.get('texing') or '无'}\n"
+            f"原料：{cp.get('yuanliao') or '无'}\n"
+            f"调料：{cp.get('tiaoliao') or '无'}\n"
+            f"做法：{cp.get('zuofa') or '无'}"
         )
     else:
         caipu = f"🥗 美食推荐：{caipu_data}"
