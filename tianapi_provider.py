@@ -22,7 +22,7 @@ def get_tianapi_data(name):
     url = f"{TIAN_API_BASE}{ENDPOINTS[name]}"
     params = {
         "key": TIAN_API_KEY,
-        "num": 3 if name in ["health", "guonei"] else 1
+        "num": 5 if name == "caipu" else 3 if name in ["health", "guonei"] else 1
     }
 
     try:
@@ -34,30 +34,28 @@ def get_tianapi_data(name):
             return f"❌ {name} 接口错误：{data.get('msg')}"
 
         result = data.get("result", {})
+        items = result.get("list", [])
 
         if name == "caipu":
-            item = result.get("list", [{}])[0]
-            return f"{item.get('cp_name')}：{item.get('zuofa')}"
+            return items  # 返回完整列表让 main.py 随机选择
 
         elif name == "zaoan":
-            item = result.get("list", [{}])[0]
+            item = items[0]
             return f"{item.get('content')} — {item.get('note')}"
 
         elif name == "health":
-            titles = [item.get("title") for item in result.get("list", []) if item.get("title")]
-            return titles if titles else "暂无健康资讯"
+            return [item.get("title") for item in items if item.get("title")]
 
         elif name == "chengyu":
-            item = result.get("list", [{}])[0]
+            item = items[0]
             return f"{item.get('chengyu')}：{item.get('content')}"
 
         elif name == "lishi":
-            item = result.get("list", [{}])[0]
+            item = items[0]
             return f"{item.get('title')}（{item.get('year')}年）"
 
         elif name == "guonei":
-            titles = [item.get("title") for item in result.get("list", []) if item.get("title")]
-            return titles if titles else "暂无国内新闻"
+            return [item.get("title") for item in items if item.get("title")]
 
         else:
             return f"⚠️ 未知处理逻辑：{name}"
