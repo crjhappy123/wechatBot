@@ -1,6 +1,7 @@
-def get_weather():
-    import requests
+import os
+import requests
 
+def get_weather():
     key = os.environ.get("QWEATHER_API_KEY")
     location = "101190104"  # 南京江宁区 Location ID
 
