@@ -46,6 +46,9 @@ def run_bot():
     else:
         news = f"📰 国内新闻：{news_data}"
 
+    museum_data = get_latest_museum_notices()
+    museum = "🏛️ 博物馆招标信息：\n- " + "\n- ".join(museum_data)
+
     # 拼接消息
     content = f"""
 📅 今日早报
@@ -58,15 +61,13 @@ def run_bot():
 {chengyu}
 {lishi}
 {news}
+{museum}
 
 🏋️ 健身饮食：{fitness}
 
 📈 股市概览：{stock}
     """
 
-museum_data = get_latest_museum_notices()
-museum = "🏛️ 博物馆招标信息：\n- " + "\n- ".join(museum_data)
-    
     send_wecom_message(content.strip())
 
 if __name__ == "__main__":
