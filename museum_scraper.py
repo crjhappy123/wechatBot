@@ -3,34 +3,41 @@
 import requests
 from bs4 import BeautifulSoup
 
-def get_latest_museum_notices(limit=3):
-    url = "https://njggzy.nanjing.gov.cn/njweb/search/fullsearch.html?wd=博物馆"
+BASE_URL = "https://njggzy.nanjing.gov.cn"
+SEARCH_URL = "https://njggzy.nanjing.gov.cn/njweb/search/fullsearch.html"
+KEYWORDS = ['博物馆', '展览馆', '文物']
+
+def get_latest_museum_notices():
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0"
     }
+    notices = []
 
-    try:
-        resp = requests.get(url, headers=headers, timeout=10)
-        resp.raise_for_status()
+    for page in range(1, 11):  # 抓取前10页
+        params = {
+            "wd": "博物馆",
+            "page": page
+        }
 
-        soup = BeautifulSoup(resp.text, "html.parser")
-        result_list = soup.select("ul.searchList li")
+        try:
+            resp = requests.get(SEARCH_URL, params=params, headers=headers, timeout=10)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
 
-        results = []
-        for item in result_list:
-            title_tag = item.select_one("a")
-            date_tag = item.select_one("span")
-            if title_tag and date_tag:
-                title = title_tag.get_text(strip=True)
-                href = title_tag["href"]
-                date = date_tag.get_text(strip=True)
-                if href.startswith("/"):
-                    href = "https://njggzy.nanjing.gov.cn" + href
-                results.append(f"{title} ({date})\n{href}")
-                if len(results) >= limit:
-                    break
+            for a in soup.find_all("a", href=True):
+                title = a.get_text(strip=True)
+                href = a["href"]
 
-        return results if results else ["暂无博物馆相关公告"]
+                if any(kw in title for kw in KEYWORDS):
+                    full_url = href if href.startswith("http") else BASE_URL + href
+                    notice = f"{title} 👉 {full_url}"
+                    if notice not in notices:
+                        notices.append(notice)
+                        if len(notices) >= 3:
+                            return notices
 
-    except Exception as e:
-        return [f"获取失败：{e}"]
+        except Exception as e:
+            return [f"❌ 博物馆信息抓取失败：{str(e)}"]
+
+    return ["暂无博物馆相关公告"]
+
