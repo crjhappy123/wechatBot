@@ -7,6 +7,7 @@ from stock_provider import get_stock_summary
 from fitness_provider import get_fitness_tip
 from wechat_sender import send_wecom_message
 from tianapi_provider import get_tianapi_data
+from museum_scraper import get_latest_museum_notices
 
 def run_bot():
     # 获取各项内容
@@ -63,6 +64,9 @@ def run_bot():
 📈 股市概览：{stock}
     """
 
+museum_data = get_latest_museum_notices()
+museum = "🏛️ 博物馆招标信息：\n- " + "\n- ".join(museum_data)
+    
     send_wecom_message(content.strip())
 
 if __name__ == "__main__":
