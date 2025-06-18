@@ -1,46 +1,51 @@
-# .github/workflows/bot.yml
 name: Daily WeChat Bot
 
 on:
   schedule:
-    - cron: '30 23 * * *'  # 每天北京时间 7:30 执行
+    - cron: '0 23 * * *'  # 每天 UTC 时间 23:00（北京时间 07:00）
   workflow_dispatch:
 
 jobs:
-  run:
+  run-bot:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y wget unzip xvfb libnss3 libgconf-2-4 libxi6 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2
-          pip install -r requirements.txt
+          sudo apt install -y wget unzip xvfb libnss3 libxi6 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2t64
 
-      - name: Install Google Chrome (v124)
+      - name: Install Google Chrome
         run: |
-          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_124.0.6367.60-1_amd64.deb
-          sudo apt install -y ./google-chrome-stable_124.0.6367.60-1_amd64.deb
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/google.gpg
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt update
+          sudo apt install -y google-chrome-stable
 
-      - name: Install ChromeDriver (v124)
+      - name: Install ChromeDriver
         run: |
-          wget https://storage.googleapis.com/chrome-for-testing-public/124.0.6367.60/linux64/chromedriver-linux64.zip
-          unzip chromedriver-linux64.zip
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
-          chmod +x /usr/local/bin/chromedriver
+          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3 | cut -d '.' -f 1)
+          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
+          unzip chromedriver.zip
+          chmod +x chromedriver
+          sudo mv chromedriver /usr/local/bin/
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
 
       - name: Run bot
+        run: |
+          xvfb-run python main.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GAODE_API_KEY: ${{ secrets.GAODE_API_KEY }}
-          QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
-          WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
           TIAN_API_KEY: ${{ secrets.TIAN_API_KEY }}
-        run: python main.py
+          WECHAT_WEBHOOK: ${{ secrets.WECHAT_WEBHOOK }}
