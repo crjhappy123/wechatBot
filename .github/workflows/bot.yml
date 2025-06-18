@@ -2,7 +2,7 @@ name: Daily WeChat Bot
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # 每天 UTC 时间 23:00（北京时间 07:00）
+    - cron: '0 23 * * *'  # 每天北京时间早上7点运行
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -21,31 +21,14 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y wget unzip xvfb libnss3 libxi6 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2t64
+          sudo apt install -y wget unzip xvfb libnss3 libxi6 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2
 
-      - name: Install Google Chrome
+      - name: Install Chrome
         run: |
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/google.gpg
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt update
-          sudo apt install -y google-chrome-stable
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+          google-chrome --version
 
       - name: Install ChromeDriver
         run: |
-          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3 | cut -d '.' -f 1)
-          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
-          unzip chromedriver.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/
-
-      - name: Install Python packages
-        run: pip install -r requirements.txt
-
-      - name: Run bot
-        run: |
-          xvfb-run python main.py
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          TIAN_API_KEY: ${{ secrets.TIAN_API_KEY }}
-          WECHAT_WEBHOOK: ${{ secrets.WECHAT_WEBHOOK }}
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+' | cut -d '.' -_
