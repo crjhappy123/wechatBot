@@ -2,47 +2,50 @@ name: Daily WeChat Bot
 
 on:
   schedule:
-    - cron: '30 23 * * *'  # 每天北京时间 7:30 执行（23:30 UTC）
+    - cron: '0 23 * * *'  # 每天 UTC 时间 23 点执行，对应北京时间早上 7 点
   workflow_dispatch:
 
 jobs:
-  run:
+  run-bot:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: 检出仓库代码
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: 设置 Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
-      - name: Install dependencies
+      - name: 安装依赖项
         run: |
-          sudo apt update
-          sudo apt install -y wget unzip xvfb libnss3 libxi6 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2t64
-
-          # 安装 Chrome 浏览器
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install -y ./google-chrome-stable_current_amd64.deb
-
-          # 安装匹配的 ChromeDriver
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
-          DRIVER_URL="https://chromedriver.storage.googleapis.com/$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)/chromedriver_linux64.zip"
-          wget "$DRIVER_URL"
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
-
-          # 安装 Python 依赖
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run bot
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GAODE_API_KEY: ${{ secrets.GAODE_API_KEY }}
-          WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
-          QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
-          TIAN_API_KEY: ${{ secrets.TIAN_API_KEY }}
+      - name: 安装 Google Chrome
         run: |
-          xvfb-run python main.py
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+
+      - name: 安装匹配版本的 Chromedriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
+          DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)
+          wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip
+          unzip /tmp/chromedriver.zip -d /tmp
+          sudo mv /tmp/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
+
+      - name: 验证 Chrome 和 Chromedriver 可用性
+        run: |
+          google-chrome --version
+          chromedriver --version
+          python -c "from selenium import webdriver; from selenium.webdriver.chrome.options import Options; options = Options(); options.add_argument('--headless'); driver = webdriver.Chrome(options=options); print(driver.title); driver.quit()"
+
+      - name: 运行主程序
+        env:
+          TIAN_API_KEY: ${{ secrets.TIAN_API_KEY }}
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+        run: |
+          python main.py
