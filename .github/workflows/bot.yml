@@ -9,6 +9,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -17,24 +18,23 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install -y ./google-chrome-stable_current_amd64.deb
-
-      - name: Install ChromeDriver
-        run: |
-          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3 | cut -d '.' -f 1)
-          LATEST=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
-          wget -N https://chromedriver.storage.googleapis.com/$LATEST/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          chmod +x chromedriver
-          sudo mv -f chromedriver /usr/local/bin/chromedriver
-
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          sudo apt update
+          sudo apt install -y wget unzip xvfb libnss3 libgconf-2-4 libxi6 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2
+          pip install -r requirements.txt
+
+      - name: Install Google Chrome (v124)
+        run: |
+          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_124.0.6367.60-1_amd64.deb
+          sudo apt install -y ./google-chrome-stable_124.0.6367.60-1_amd64.deb
+
+      - name: Install ChromeDriver (v124)
+        run: |
+          wget https://storage.googleapis.com/chrome-for-testing-public/124.0.6367.60/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          chmod +x /usr/local/bin/chromedriver
 
       - name: Run bot
         env:
