@@ -1,29 +1,29 @@
 # wechat_daily_bot/museum_scraper.py
 
-import requests
-from bs4 import BeautifulSoup
+import os
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+import time
 
 def get_latest_museum_notices():
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    driver = webdriver.Chrome(options=options)
     url = "https://njggzy.nanjing.gov.cn/njweb/search/fullsearch.html?wd=博物馆"
-    try:
-        response = requests.get(url, timeout=8)
-        response.encoding = 'utf-8'
-        soup = BeautifulSoup(response.text, 'html.parser')
-        items = soup.find_all('div', class_='list-item')
+    driver.get(url)
+    time.sleep(3)  # 等待页面加载完成
 
-        museum_news = []
-        for item in items:
-            title_tag = item.find('a', title=True)
-            if title_tag and "博物馆" in title_tag['title']:
-                title = title_tag['title']
-                museum_news.append(title)
-            if len(museum_news) >= 3:
-                break
+    elements = driver.find_elements(By.CSS_SELECTOR, "div.search-cont-box > ul > li")
+    results = []
 
-        if not museum_news:
-            return ["暂无博物馆相关公告"]
+    for el in elements[:5]:
+        title = el.text.strip()
+        if title:
+            results.append(title)
 
-        return museum_news
-
-    except Exception as e:
-        return [f"❌ 获取失败：{str(e)}"]
+    driver.quit()
+    return results if results else ["暂无博物馆相关公告"]
